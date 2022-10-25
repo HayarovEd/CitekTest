@@ -15,6 +15,9 @@ import androidx.lifecycle.ViewModelProvider;
 import com.edurda77.citektest.data.model.Users;
 import com.edurda77.citektest.databinding.ActivityLoginBinding;
 
+import dagger.hilt.android.AndroidEntryPoint;
+
+@AndroidEntryPoint
 public class LoginActivity extends AppCompatActivity {
     LoginViewModel loginViewModel;
     TextView messageTv;

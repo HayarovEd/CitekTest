@@ -20,21 +20,26 @@ import com.edurda77.citektest.databinding.ActivitySecondBinding;
 import java.util.ArrayList;
 import java.util.List;
 
+import dagger.hilt.android.AndroidEntryPoint;
+
+@AndroidEntryPoint
 public class SecondActivity extends AppCompatActivity {
     private ActivitySecondBinding binding;
     TextView successConnect;
     EditText password;
     Spinner spinner;
+    SecondActivityViewModel secondActivityViewModel;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         binding = ActivitySecondBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
+        secondActivityViewModel = new ViewModelProvider(this).get(SecondActivityViewModel.class);
         successConnect = binding.success;
         password = binding.password;
         spinner = binding.dataSp;
-
         Bundle arguments = getIntent().getExtras();
         Users users;
 
@@ -44,6 +49,9 @@ public class SecondActivity extends AppCompatActivity {
             List<String> nameUser = new ArrayList<>();
             for (User it: dataUser) {
                 nameUser.add(it.getUserName());
+                Runnable task = () -> secondActivityViewModel.addUser(it);
+                Thread thread = new Thread(task);
+                thread.start();
             }
             ArrayAdapter adapter = new ArrayAdapter(this, android.R.layout.simple_spinner_item, nameUser);
             spinner.setAdapter(adapter);
