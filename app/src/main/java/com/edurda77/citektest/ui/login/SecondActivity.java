@@ -2,6 +2,8 @@ package com.edurda77.citektest.ui.login;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
@@ -18,6 +20,7 @@ import java.util.List;
 
 public class SecondActivity extends AppCompatActivity {
     private ActivitySecondBinding binding;
+    SharedPreferences sharedPref;
     TextView successConnect;
     EditText password;
     Spinner spinner;
@@ -31,7 +34,9 @@ public class SecondActivity extends AppCompatActivity {
         successConnect = binding.success;
         password = binding.password;
         spinner = binding.dataSp;
-
+        sharedPref = getSharedPreferences("success", Context.MODE_PRIVATE);
+        Integer attempt = sharedPref.getInt("success", 1);
+        successConnect.setText("Количество успешных попыток: "+ attempt);
         Bundle arguments = getIntent().getExtras();
         Users users;
         if(arguments!=null){
@@ -43,6 +48,9 @@ public class SecondActivity extends AppCompatActivity {
             }
             ArrayAdapter adapter = new ArrayAdapter(this, android.R.layout.simple_spinner_item, nameUser);
             spinner.setAdapter(adapter);
+
+            sharedPref.edit().putInt("success", attempt+1).apply();
+
         }
     }
 }
