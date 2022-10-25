@@ -1,18 +1,20 @@
 package com.edurda77.citektest.ui.login;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.lifecycle.ViewModelProvider;
 
-import android.content.Context;
-import android.content.SharedPreferences;
+import android.app.Application;
 import android.os.Bundle;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.TextView;
 
+import com.edurda77.citektest.data.db.CacheDao;
+import com.edurda77.citektest.data.db.CacheDb;
+import com.edurda77.citektest.data.db.RepositoryDb;
 import com.edurda77.citektest.data.model.User;
 import com.edurda77.citektest.data.model.Users;
-import com.edurda77.citektest.databinding.ActivityLoginBinding;
 import com.edurda77.citektest.databinding.ActivitySecondBinding;
 
 import java.util.ArrayList;
@@ -29,11 +31,9 @@ public class SecondActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         binding = ActivitySecondBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
-
         successConnect = binding.success;
         password = binding.password;
         spinner = binding.dataSp;
-
 
         Bundle arguments = getIntent().getExtras();
         Users users;
@@ -49,6 +49,7 @@ public class SecondActivity extends AppCompatActivity {
             spinner.setAdapter(adapter);
             int count = arguments.getInt("count");
             successConnect.setText("Количество успешных попыток: "+ count);
+
         }
 
     }

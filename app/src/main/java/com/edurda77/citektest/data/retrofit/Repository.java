@@ -15,7 +15,6 @@ import retrofit2.converter.gson.GsonConverterFactory;
 public class Repository {
 
     private static final String BASE_URL = "https://dev.sitec24.ru/UKA_TRADE/";
-    MutableLiveData<NetworkData> data = new MutableLiveData<>();
     OkHttpClient okHttpClient = UnsafeOkHttpClient.getUnsafeOkHttpClient();
     private ApiCitek apiCitek () {
 

@@ -11,7 +11,9 @@ import java.io.Serializable;
 
 @Entity(tableName = "cache_user")
 public class User implements Serializable {
-    @PrimaryKey
+    @PrimaryKey (autoGenerate = true)
+    @ColumnInfo (defaultValue = "id")
+    private Integer id;
     @ColumnInfo (defaultValue = "user")
     @SerializedName("User")
     private String userName;
@@ -34,6 +36,14 @@ public class User implements Serializable {
 
     public void setUserName(String userName) {
         this.userName = userName;
+    }
+
+    public Integer getId() {
+        return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
     }
 
     public String getUserUid() {
