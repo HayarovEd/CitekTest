@@ -1,6 +1,8 @@
 package com.edurda77.citektest.ui.login;
 
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.widget.Button;
 import android.widget.EditText;
@@ -10,11 +12,8 @@ import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.ViewModelProvider;
 
-import com.edurda77.citektest.data.model.User;
 import com.edurda77.citektest.data.model.Users;
 import com.edurda77.citektest.databinding.ActivityLoginBinding;
-
-import java.util.List;
 
 public class LoginActivity extends AppCompatActivity {
     LoginViewModel loginViewModel;
@@ -22,6 +21,7 @@ public class LoginActivity extends AppCompatActivity {
     EditText userEv, passwordEv;
     Button bLogin;
     ProgressBar progressBar;
+    SharedPreferences sharedPref;
     private ActivityLoginBinding binding;
 
     @Override
@@ -43,6 +43,11 @@ public class LoginActivity extends AppCompatActivity {
             if (users!=null) {
                 Intent intent = new Intent(this, SecondActivity.class);
                 intent.putExtra(Users.class.getSimpleName(), users);
+                sharedPref = getSharedPreferences("success", Context.MODE_PRIVATE);
+                int attempt = sharedPref.getInt("success", 1);
+                intent.putExtra("count", attempt);
+                int count = attempt+1;
+                sharedPref.edit().putInt("success", count).apply();
                 startActivity(intent);
             }
         });
