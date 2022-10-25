@@ -1,10 +1,8 @@
 package com.edurda77.citektest.data.retrofit;
 
-import androidx.annotation.NonNull;
-import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
-import com.edurda77.citektest.data.model.Users;
+import com.edurda77.citektest.data.model.NetworkData;
 
 import okhttp3.Credentials;
 import okhttp3.OkHttpClient;
@@ -17,7 +15,7 @@ import retrofit2.converter.gson.GsonConverterFactory;
 public class Repository {
 
     private static final String BASE_URL = "https://dev.sitec24.ru/UKA_TRADE/";
-    MutableLiveData<Users> data = new MutableLiveData<>();
+    MutableLiveData<NetworkData> data = new MutableLiveData<>();
     OkHttpClient okHttpClient = UnsafeOkHttpClient.getUnsafeOkHttpClient();
     private ApiCitek apiCitek () {
 
@@ -30,23 +28,61 @@ public class Repository {
                 .create(ApiCitek.class);
     }
 
-    public LiveData<Users> getaData(String uid, String pass) {
+    /*public MutableLiveData<NetworkData> getaData(String uid, String pass) {
 
         String autoHeader = Credentials.basic(uid, pass);
-        apiCitek().getUsers(autoHeader).enqueue(new Callback<Users>() {
+
+        apiCitek().getUsers(autoHeader).enqueue(new Callback<NetworkData>() {
             @Override
-            public void onResponse(@NonNull Call<Users> call, @NonNull Response<Users> response) {
-                if (response.body() != null) {
+            public void onResponse(@NonNull Call<NetworkData> call, @NonNull Response<NetworkData> response) {
+                if (response.isSuccessful()) {
                     data.setValue(response.body());
+                }
+                else {
+                    try {
+                        JSONObject jObjError = new JSONObject(response.errorBody().string());
+                        //Toast.makeText(getContext(), jObjError.getJSONObject("error").getString("message"), Toast.LENGTH_LONG).show();
+                    } catch (Exception e) {
+                        //Toast.makeText(getContext(), e.getMessage(), Toast.LENGTH_LONG).show();
+                    }
                 }
             }
 
             @Override
-            public void onFailure(@NonNull Call<Users> call, Throwable t) {
-                data.setValue(null);
+            public void onFailure(@NonNull Call<NetworkData> call, Throwable t) {
+
             }
         });
         return data;
+    }*/
+
+    public void loginRemote(String uid, String pass, ILoginResponse loginResponse){
+        String autoHeader = Credentials.basic(uid, pass);
+        Call<NetworkData> initiateLogin = apiCitek().getUsers(autoHeader);
+
+
+        initiateLogin.enqueue(new Callback<NetworkData>() {
+            @Override
+            public void onResponse(Call<NetworkData> call, Response<NetworkData> response) {
+                if (response.isSuccessful()){
+                    loginResponse.onResponse(response.body());
+                } else {
+                    assert response.errorBody() != null;
+                    loginResponse.onFailure(new Throwable(response.message()));
+                }
+            }
+
+            @Override
+            public void onFailure(Call<NetworkData> call, Throwable t) {
+                loginResponse.onFailure(t);
+            }
+        });
+
     }
 
+
+    public interface ILoginResponse{
+        void onResponse(NetworkData networkData);
+        void onFailure(Throwable t);
+    }
 }
