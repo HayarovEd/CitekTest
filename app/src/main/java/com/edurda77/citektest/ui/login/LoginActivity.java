@@ -1,136 +1,60 @@
 package com.edurda77.citektest.ui.login;
 
-import android.app.Activity;
-
-import androidx.lifecycle.Observer;
-import androidx.lifecycle.ViewModelProvider;
-
+import android.content.Context;
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
-
-import androidx.annotation.Nullable;
-import androidx.annotation.StringRes;
-import androidx.appcompat.app.AppCompatActivity;
-
-import android.text.Editable;
-import android.text.TextWatcher;
-import android.view.KeyEvent;
-import android.view.View;
-import android.view.inputmethod.EditorInfo;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.TextView;
-import android.widget.Toast;
 
-import com.edurda77.citektest.R;
-import com.edurda77.citektest.ui.login.LoginViewModel;
-import com.edurda77.citektest.ui.login.LoginViewModelFactory;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.lifecycle.ViewModelProvider;
+
+import com.edurda77.citektest.data.model.Users;
 import com.edurda77.citektest.databinding.ActivityLoginBinding;
 
-public class LoginActivity extends AppCompatActivity {
+import dagger.hilt.android.AndroidEntryPoint;
 
-    private LoginViewModel loginViewModel;
+@AndroidEntryPoint
+public class LoginActivity extends AppCompatActivity {
+    LoginViewModel loginViewModel;
+    TextView messageTv;
+    EditText userEv, passwordEv;
+    Button bLogin;
+    ProgressBar progressBar;
+    SharedPreferences sharedPref;
     private ActivityLoginBinding binding;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
         binding = ActivityLoginBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
+        loginViewModel = new ViewModelProvider(this).get(LoginViewModel.class);
+        messageTv = binding.message;
+        userEv = binding.username;
+        passwordEv = binding.password;
+        bLogin = binding.login;
+        progressBar = binding.loading;
 
-        loginViewModel = new ViewModelProvider(this, new LoginViewModelFactory())
-                .get(LoginViewModel.class);
-
-        final EditText usernameEditText = binding.username;
-        final EditText passwordEditText = binding.password;
-        final Button loginButton = binding.login;
-        final ProgressBar loadingProgressBar = binding.loading;
-
-        loginViewModel.getLoginFormState().observe(this, new Observer<LoginFormState>() {
-            @Override
-            public void onChanged(@Nullable LoginFormState loginFormState) {
-                if (loginFormState == null) {
-                    return;
-                }
-                loginButton.setEnabled(loginFormState.isDataValid());
-                if (loginFormState.getUsernameError() != null) {
-                    usernameEditText.setError(getString(loginFormState.getUsernameError()));
-                }
-                if (loginFormState.getPasswordError() != null) {
-                    passwordEditText.setError(getString(loginFormState.getPasswordError()));
-                }
+        loginViewModel.getProgress().observe(this, visibility -> progressBar.setVisibility(visibility));
+        loginViewModel.getShowLoginResult().observe(this, s -> messageTv.setText(s));
+        loginViewModel.getLoginResult().observe(this, data -> {
+            Users users = data.getUsers();
+            if (users!=null) {
+                Intent intent = new Intent(this, SecondActivity.class);
+                intent.putExtra(Users.class.getSimpleName(), users);
+                sharedPref = getSharedPreferences("success", Context.MODE_PRIVATE);
+                int attempt = sharedPref.getInt("success", 1);
+                intent.putExtra("count", attempt);
+                int count = attempt+1;
+                sharedPref.edit().putInt("success", count).apply();
+                startActivity(intent);
             }
         });
 
-        loginViewModel.getLoginResult().observe(this, new Observer<LoginResult>() {
-            @Override
-            public void onChanged(@Nullable LoginResult loginResult) {
-                if (loginResult == null) {
-                    return;
-                }
-                loadingProgressBar.setVisibility(View.GONE);
-                if (loginResult.getError() != null) {
-                    showLoginFailed(loginResult.getError());
-                }
-                if (loginResult.getSuccess() != null) {
-                    updateUiWithUser(loginResult.getSuccess());
-                }
-                setResult(Activity.RESULT_OK);
-
-                //Complete and destroy login activity once successful
-                finish();
-            }
-        });
-
-        TextWatcher afterTextChangedListener = new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-                // ignore
-            }
-
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-                // ignore
-            }
-
-            @Override
-            public void afterTextChanged(Editable s) {
-                loginViewModel.loginDataChanged(usernameEditText.getText().toString(),
-                        passwordEditText.getText().toString());
-            }
-        };
-        usernameEditText.addTextChangedListener(afterTextChangedListener);
-        passwordEditText.addTextChangedListener(afterTextChangedListener);
-        passwordEditText.setOnEditorActionListener(new TextView.OnEditorActionListener() {
-
-            @Override
-            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
-                if (actionId == EditorInfo.IME_ACTION_DONE) {
-                    loginViewModel.login(usernameEditText.getText().toString(),
-                            passwordEditText.getText().toString());
-                }
-                return false;
-            }
-        });
-
-        loginButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                loadingProgressBar.setVisibility(View.VISIBLE);
-                loginViewModel.login(usernameEditText.getText().toString(),
-                        passwordEditText.getText().toString());
-            }
-        });
-    }
-
-    private void updateUiWithUser(LoggedInUserView model) {
-        String welcome = getString(R.string.welcome) + model.getDisplayName();
-        // TODO : initiate successful logged in experience
-        Toast.makeText(getApplicationContext(), welcome, Toast.LENGTH_LONG).show();
-    }
-
-    private void showLoginFailed(@StringRes Integer errorString) {
-        Toast.makeText(getApplicationContext(), errorString, Toast.LENGTH_SHORT).show();
+        bLogin.setOnClickListener(v -> loginViewModel.login(userEv.getText().toString(), passwordEv.getText().toString()));
     }
 }

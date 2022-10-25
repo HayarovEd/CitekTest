@@ -1,70 +1,59 @@
 package com.edurda77.citektest.ui.login;
 
+import android.view.View;
+
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
-import android.util.Patterns;
-
-import com.edurda77.citektest.data.LoginRepository;
-import com.edurda77.citektest.data.Result;
-import com.edurda77.citektest.data.model.LoggedInUser;
-import com.edurda77.citektest.R;
+import com.edurda77.citektest.data.model.NetworkData;
+import com.edurda77.citektest.data.model.Users;
+import com.edurda77.citektest.data.retrofit.Repository;
 
 public class LoginViewModel extends ViewModel {
+    Repository repository;
 
-    private MutableLiveData<LoginFormState> loginFormState = new MutableLiveData<>();
-    private MutableLiveData<LoginResult> loginResult = new MutableLiveData<>();
-    private LoginRepository loginRepository;
+    MutableLiveData<Integer> mProgressMutableData = new MutableLiveData<>();
+    MutableLiveData<NetworkData> mLoginResultMutableData = new MutableLiveData<>();
+    MutableLiveData<String> mLoginShowMutableData = new MutableLiveData<>();
+    MutableLiveData<Users> resultUserData = new MutableLiveData<>();
 
-    LoginViewModel(LoginRepository loginRepository) {
-        this.loginRepository = loginRepository;
+    public LoginViewModel() {
+        mProgressMutableData.postValue(View.INVISIBLE);
+        mLoginShowMutableData.postValue("Готов к коннекту");
+        //mLoginResultMutableData.postValue(null);
+        repository = new Repository();
     }
 
-    LiveData<LoginFormState> getLoginFormState() {
-        return loginFormState;
+    public void login(String userName, String userPassword){
+        mProgressMutableData.postValue(View.VISIBLE);
+        mLoginShowMutableData.postValue("Проверка");
+        repository.loginRemote(userName, userPassword, new Repository.ILoginResponse() {
+            @Override
+            public void onResponse(NetworkData networkData) {
+                mProgressMutableData.postValue(View.INVISIBLE);
+                mLoginShowMutableData.postValue("Успешный коннект");
+                mLoginResultMutableData.postValue(networkData);
+            }
+
+            @Override
+            public void onFailure(Throwable t) {
+                mProgressMutableData.postValue(View.INVISIBLE);
+                mLoginShowMutableData.postValue("Login failure: " + t.getLocalizedMessage());
+            }
+        });
     }
 
-    LiveData<LoginResult> getLoginResult() {
-        return loginResult;
+    public LiveData<NetworkData> getLoginResult(){
+        return mLoginResultMutableData;
     }
 
-    public void login(String username, String password) {
-        // can be launched in a separate asynchronous job
-        Result<LoggedInUser> result = loginRepository.login(username, password);
-
-        if (result instanceof Result.Success) {
-            LoggedInUser data = ((Result.Success<LoggedInUser>) result).getData();
-            loginResult.setValue(new LoginResult(new LoggedInUserView(data.getDisplayName())));
-        } else {
-            loginResult.setValue(new LoginResult(R.string.login_failed));
-        }
+    public LiveData<String> getShowLoginResult(){
+        return mLoginShowMutableData;
     }
 
-    public void loginDataChanged(String username, String password) {
-        if (!isUserNameValid(username)) {
-            loginFormState.setValue(new LoginFormState(R.string.invalid_username, null));
-        } else if (!isPasswordValid(password)) {
-            loginFormState.setValue(new LoginFormState(null, R.string.invalid_password));
-        } else {
-            loginFormState.setValue(new LoginFormState(true));
-        }
+    public LiveData<Integer> getProgress(){
+        return mProgressMutableData;
     }
 
-    // A placeholder username validation check
-    private boolean isUserNameValid(String username) {
-        if (username == null) {
-            return false;
-        }
-        if (username.contains("@")) {
-            return Patterns.EMAIL_ADDRESS.matcher(username).matches();
-        } else {
-            return !username.trim().isEmpty();
-        }
-    }
-
-    // A placeholder password validation check
-    private boolean isPasswordValid(String password) {
-        return password != null && password.trim().length() > 5;
-    }
 }
