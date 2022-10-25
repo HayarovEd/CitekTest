@@ -9,6 +9,7 @@ import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.ViewModelProvider;
 
+import com.edurda77.citektest.data.model.Users;
 import com.edurda77.citektest.databinding.ActivityLoginBinding;
 
 public class LoginActivity extends AppCompatActivity {
@@ -33,6 +34,9 @@ public class LoginActivity extends AppCompatActivity {
 
         loginViewModel.getProgress().observe(this, visibility -> progressBar.setVisibility(visibility));
         loginViewModel.getShowLoginResult().observe(this, s -> messageTv.setText(s));
+        loginViewModel.getLoginResult().observe(this, data -> {
+            Users a = data.getUsers();
+        });
 
         bLogin.setOnClickListener(v -> loginViewModel.login(userEv.getText().toString(), passwordEv.getText().toString()));
     }

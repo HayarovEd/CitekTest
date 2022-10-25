@@ -21,7 +21,7 @@ public class LoginViewModel extends ViewModel {
     public LoginViewModel() {
         mProgressMutableData.postValue(View.INVISIBLE);
         mLoginShowMutableData.postValue("Готов к коннекту");
-        mLoginResultMutableData.postValue(null);
+        //mLoginResultMutableData.postValue(null);
         repository = new Repository();
     }
 
