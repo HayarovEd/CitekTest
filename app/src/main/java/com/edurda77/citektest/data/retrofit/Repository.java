@@ -28,34 +28,6 @@ public class Repository {
                 .create(ApiCitek.class);
     }
 
-    /*public MutableLiveData<NetworkData> getaData(String uid, String pass) {
-
-        String autoHeader = Credentials.basic(uid, pass);
-
-        apiCitek().getUsers(autoHeader).enqueue(new Callback<NetworkData>() {
-            @Override
-            public void onResponse(@NonNull Call<NetworkData> call, @NonNull Response<NetworkData> response) {
-                if (response.isSuccessful()) {
-                    data.setValue(response.body());
-                }
-                else {
-                    try {
-                        JSONObject jObjError = new JSONObject(response.errorBody().string());
-                        //Toast.makeText(getContext(), jObjError.getJSONObject("error").getString("message"), Toast.LENGTH_LONG).show();
-                    } catch (Exception e) {
-                        //Toast.makeText(getContext(), e.getMessage(), Toast.LENGTH_LONG).show();
-                    }
-                }
-            }
-
-            @Override
-            public void onFailure(@NonNull Call<NetworkData> call, Throwable t) {
-
-            }
-        });
-        return data;
-    }*/
-
     public void loginRemote(String uid, String pass, ILoginResponse loginResponse){
         String autoHeader = Credentials.basic(uid, pass);
         Call<NetworkData> initiateLogin = apiCitek().getUsers(autoHeader);

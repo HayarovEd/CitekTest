@@ -1,5 +1,6 @@
 package com.edurda77.citektest.ui.login;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.widget.Button;
 import android.widget.EditText;
@@ -9,8 +10,11 @@ import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.ViewModelProvider;
 
+import com.edurda77.citektest.data.model.User;
 import com.edurda77.citektest.data.model.Users;
 import com.edurda77.citektest.databinding.ActivityLoginBinding;
+
+import java.util.List;
 
 public class LoginActivity extends AppCompatActivity {
     LoginViewModel loginViewModel;
@@ -35,7 +39,12 @@ public class LoginActivity extends AppCompatActivity {
         loginViewModel.getProgress().observe(this, visibility -> progressBar.setVisibility(visibility));
         loginViewModel.getShowLoginResult().observe(this, s -> messageTv.setText(s));
         loginViewModel.getLoginResult().observe(this, data -> {
-            Users a = data.getUsers();
+            Users users = data.getUsers();
+            if (users!=null) {
+                Intent intent = new Intent(this, SecondActivity.class);
+                intent.putExtra(Users.class.getSimpleName(), users);
+                startActivity(intent);
+            }
         });
 
         bLogin.setOnClickListener(v -> loginViewModel.login(userEv.getText().toString(), passwordEv.getText().toString()));

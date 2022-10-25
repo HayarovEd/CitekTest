@@ -7,7 +7,7 @@ import androidx.room.PrimaryKey;
 import java.io.Serializable;
 @Entity(tableName = "table_connect")
 public class SuccessConnect implements Serializable {
-    @PrimaryKey(autoGenerate = true)
+    @PrimaryKey
     @ColumnInfo(defaultValue = "count")
     private Integer countConnect;
 
